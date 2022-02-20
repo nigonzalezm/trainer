@@ -97,6 +97,10 @@ module.exports.moveBallTo = (x, y) => {
     return send(`(move (ball) ${x.toFixed(2)} ${y.toFixed(2)})`);
 }
 
+module.exports.recover = () => {
+    return send('(recover)');
+}
+
 module.exports.close = () => {
     client.close();
 }
