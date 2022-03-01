@@ -21,7 +21,7 @@ async function script() {
         await trainer.recover();
     }
     await trainer.say('finish');
-    setTimeout(() => { trainer.close(); }, 1000);
+    await trainer.close();
 }
 
 script();

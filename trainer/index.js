@@ -1,6 +1,7 @@
 const dgram = require('dgram');
 const Buffer = require('buffer').Buffer;
 const EventEmitter = require('events');
+const sexp = require('s-expression');
 
 class Emitter extends EventEmitter {};
 
@@ -10,18 +11,20 @@ const emitter = new Emitter();
 
 client.on('message', (message, info) => {
     port = info.port;
-    message = message.toString('utf8'); // message is of type buffer
+    message = message.toString('utf8').slice(0, -1); // message is of type buffer, and it includes a strage char at the end
     let message_type = message.substring(1, message.indexOf(' '));
     switch (message_type) {
         case 'init':
         case 'see_global':
-            emitter.emit(message_type);
+            emitter.emit(message_type, message);
             break;
         case 'error':
             console.error(message);
             emitter.emit('error', new Error(message));
             break;
         case 'ok':
+            if (process.env.LOG_OK) { console.log(message); }
+            break;
         case 'warning':
             console.log(message);
             break;
@@ -65,6 +68,37 @@ module.exports.init = () => {
     });
 }
 
+module.exports.nextCycle = () => {
+    return new Promise((resolve, reject) => {
+        function onSeeGlobal(see_global) {
+            emitter.removeListener('see_global', onSeeGlobal);
+            emitter.removeListener('error', onError);
+            let tree = sexp(see_global);
+            if (tree instanceof Error) {
+                reject(tree);
+            } else {
+                let see = { game_time: parseInt(tree[1]) };
+                tree.forEach(element => {
+                    if (element instanceof Array) {
+                        let name = element[0];
+                        if (name[0] == 'b') {
+                            see.ball = { x: parseFloat(element[1]), y: parseFloat(element[2]) }
+                        }
+                    }
+                });
+                resolve(see);
+            }
+        }
+        function onError(err) {
+            emitter.removeListener('see_global', onSeeGlobal);
+            emitter.removeListener('error', onError);
+            reject(err);
+        }
+        emitter.on('see_global', onSeeGlobal);
+        emitter.on('error', onError);
+    })
+}
+
 module.exports.waitFor = (cycles) => {
     return new Promise((resolve, reject) => {
         function onSeeGlobal() {
@@ -102,5 +136,10 @@ module.exports.recover = () => {
 }
 
 module.exports.close = () => {
-    client.close();
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            client.close();
+            resolve();
+        }, 1000);
+    });
 }
