@@ -9,14 +9,41 @@ let port = 6001;
 const client = dgram.createSocket('udp4');
 const emitter = new Emitter();
 
+let flags = {
+    'g l': { x: -52.5, y: 0 },
+    'g r': { x:  52.5, y: 0 }
+};
+
+let server = {
+    goal_width: 14.02
+};
+
+function parseServerParam(message) {
+    let tree = sexp(message);
+    tree.forEach(element => {
+        if (element instanceof Array) {
+            switch (element[0]) {
+                case 'goal_width':
+                    server.goal_width = parseFloat(element[1]);
+                    break;
+                default:
+                    break;
+            }
+        }
+    });
+}
+
 client.on('message', (message, info) => {
     port = info.port;
-    message = message.toString('utf8').slice(0, -1); // message is of type buffer, and it includes a strage char at the end
+    message = message.toString('utf8').slice(0, -1); // message is of type buffer, and it includes a strange char at the end
     let message_type = message.substring(1, message.indexOf(' '));
     switch (message_type) {
         case 'init':
         case 'see_global':
             emitter.emit(message_type, message);
+            break;
+        case 'server_param':
+            parseServerParam(message);
             break;
         case 'error':
             console.error(message);
@@ -142,4 +169,19 @@ module.exports.close = () => {
             resolve();
         }, 1000);
     });
+}
+
+module.exports.randomPosition = () => {
+    return {
+        x: -52 + Math.random() * 104,
+        y: -34 + Math.random() * 68
+    };
+}
+
+module.exports.getFlag = (flag) => {
+    return flags[flag];
+}
+
+module.exports.getServerParam = (server_param) => {
+    return server[server_param];
 }
