@@ -162,6 +162,14 @@ module.exports.recover = () => {
     return send('(recover)');
 }
 
+module.exports.commandMoveTo = (x, y) => {
+    return send(`(say mt ${x.toFixed(2)} ${y.toFixed(2)})`);
+}
+
+module.exports.commandKickBallTo = (x, y) => {
+    return send(`(say kt ${x.toFixed(2)} ${y.toFixed(2)})`);
+}
+
 module.exports.close = () => {
     return new Promise((resolve, reject) => {
         setTimeout(() => {
