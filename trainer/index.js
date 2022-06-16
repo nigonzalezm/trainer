@@ -163,11 +163,19 @@ module.exports.recover = () => {
 }
 
 module.exports.commandMoveTo = (x, y) => {
-    return send(`(say mt ${x.toFixed(2)} ${y.toFixed(2)})`);
+    return send(`(say c/move ${x.toFixed(2)} ${y.toFixed(2)})`);
 }
 
 module.exports.commandKickBallTo = (x, y) => {
-    return send(`(say kt ${x.toFixed(2)} ${y.toFixed(2)})`);
+    return send(`(say c/kick ${x.toFixed(2)} ${y.toFixed(2)})`);
+}
+
+module.exports.commandPassBall = () => {
+    return send(`(say c/pass)`);
+}
+
+module.exports.setStrategy = (strategy) => {
+    return send(`(say s/${strategy})`);
 }
 
 module.exports.close = () => {
