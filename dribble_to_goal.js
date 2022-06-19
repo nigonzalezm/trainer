@@ -2,10 +2,11 @@ const trainer = require('./trainer');
 
 async function script() {
     await trainer.init();
+    await trainer.setStrategy('repeat');
+    await trainer.commandKickBallTo(52.5, 0);
     await trainer.waitFor(5);
     let goal_width = trainer.getServerParam('goal_width');
     let flag_gr = trainer.getFlag('g r');
-    console.log(flag_gr);
     await trainer.changeTo('play_on');
     for (let iteration = 0; iteration < 10; iteration++) {
         let is_goal = false;
@@ -24,7 +25,7 @@ async function script() {
         }
     }
     await trainer.changeTo('before_kick_off');
-    await trainer.say('finish');
+    await trainer.say('g/mode finish');
     await trainer.close();
 }
 

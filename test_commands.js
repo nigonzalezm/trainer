@@ -10,7 +10,7 @@ async function script() {
     await trainer.commandKickBallTo(30, 30);
     await trainer.waitFor(1000);
     await trainer.changeTo('before_kick_off');
-    await trainer.say('sm finish');
+    await trainer.say('g/mode finish');
     await trainer.close();
 }
 
